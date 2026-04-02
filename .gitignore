@@ -1,0 +1,36 @@
+ # ── Secrets & Environnement ──────────────────
+.env
+.env.local
+.env.production
+local.settings.json
+*.pfx
+*.key
+
+# ── Node.js ──────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.npm
+
+# ── Azure Functions ──────────────────────────
+api/node_modules/
+.funcignore
+bin/
+obj/
+
+# ── IDE ──────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+
+# ── Build ─────────────────────────────────────
+dist/
+build/
+.cache/
+
+# ── Logs ──────────────────────────────────────
+*.log
+logs/

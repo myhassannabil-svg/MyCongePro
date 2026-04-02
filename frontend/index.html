@@ -1,0 +1,178 @@
+ <!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CongiPro — Gestion des Congés</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="assets/icons/favicon.ico">
+</head>
+<body>
+
+  <!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🏖️</span>
+      <span class="logo-text">CongiPro</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#" class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Tableau de bord</span>
+      </a>
+      <a href="#" class="nav-item" data-page="planning">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">Planning</span>
+      </a>
+      <a href="#" class="nav-item" data-page="myleaves">
+        <span class="nav-icon">✈️</span>
+        <span class="nav-label">Mes Congés</span>
+      </a>
+      <a href="#" class="nav-item" data-page="validation" id="navValidation">
+        <span class="nav-icon">✅</span>
+        <span class="nav-label">Validation</span>
+        <span class="badge-count" id="pendingCount" style="display:none">0</span>
+      </a>
+      <a href="#" class="nav-item" data-page="employees" id="navEmployees">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Employés</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info" id="userInfo">
+        <div class="avatar" id="userAvatar">--</div>
+        <div class="user-details">
+          <div class="user-name"  id="userName">Chargement...</div>
+          <div class="user-role"  id="userRole">--</div>
+        </div>
+      </div>
+      <button class="btn-logout" id="btnLogout">🚪 Déconnexion</button>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ══════════════════════════════════════ -->
+  <main class="main-content" id="mainContent">
+
+    <!-- Header -->
+    <header class="top-header">
+      <button class="btn-menu" id="btnMenu">☰</button>
+      <h1 class="page-title" id="pageTitle">Tableau de bord</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" id="btnNewLeave" onclick="openNewLeaveModal()">
+          ➕ Nouvelle demande
+        </button>
+      </div>
+    </header>
+
+    <!-- Pages -->
+    <div class="page-content">
+      <div id="page-dashboard"   class="page active"></div>
+      <div id="page-planning"    class="page"></div>
+      <div id="page-myleaves"    class="page"></div>
+      <div id="page-validation"  class="page"></div>
+      <div id="page-employees"   class="page"></div>
+    </div>
+
+  </main>
+
+  <!-- ═══ MODALS ════════════════════════════════════════════ -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal()"></div>
+
+  <!-- Modal nouvelle demande -->
+  <div class="modal" id="modalNewLeave">
+    <div class="modal-header">
+      <h2>➕ Nouvelle demande de congé</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="formNewLeave">
+
+        <div class="form-group" id="fgEmployee">
+          <label>Employé</label>
+          <select id="selectEmployee" class="form-control">
+            <option value="">-- Sélectionner --</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Type de congé</label>
+            <select id="selectLeaveType" class="form-control" onchange="updateDaysCount()">
+              <option value="CP">🏖️ Congés Payés</option>
+              <option value="RTT">⚡ RTT</option>
+              <option value="CSS">🏥 Congé Sans Solde</option>
+              <option value="MAL">🤒 Maladie</option>
+              <option value="EXC">⭐ Exceptionnel</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Nombre de jours</label>
+            <div class="days-display" id="daysDisplay">0 jour(s)</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date de début</label>
+            <input type="date" id="inputStartDate" class="form-control"
+                   onchange="updateDaysCount()" required>
+          </div>
+          <div class="form-group">
+            <label>Date de fin</label>
+            <input type="date" id="inputEndDate" class="form-control"
+                   onchange="updateDaysCount()" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Motif (optionnel)</label>
+          <textarea id="inputReason" class="form-control" rows="3"
+                    placeholder="Précisez le motif si nécessaire..."></textarea>
+        </div>
+
+        <div class="balance-preview" id="balancePreview"></div>
+
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary"   onclick="submitNewLeave()">
+        📤 Soumettre la demande
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal validation -->
+  <div class="modal" id="modalValidation">
+    <div class="modal-header">
+      <h2 id="modalValidationTitle">Validation</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modalValidationInfo"></div>
+      <div class="form-group" style="margin-top:16px">
+        <label>Commentaire (optionnel)</label>
+        <textarea id="inputValidationComment" class="form-control" rows="3"
+                  placeholder="Ajouter un commentaire..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary"   id="btnConfirmValidation"
+              onclick="confirmValidation()">Confirmer</button>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>
